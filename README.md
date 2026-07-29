@@ -16,19 +16,17 @@ O sistema também deverá manter o controle dos veículos presentes no estaciona
 
 ## RF01 – Identificação por RFID
 
-O sistema deverá utilizar um leitor RFID para identificar os veículos que solicitarem acesso ao estacionamento.
-
-Cada veículo autorizado deverá possuir uma tag RFID previamente cadastrada e associada a uma identificação do veículo ou usuário.
-
----
-
-## RF02 – Validação da Tag
-
 Ao aproximar uma tag RFID do leitor, o sistema deverá verificar se seu identificador está presente na lista de usuários autorizados.
 
 Caso a tag seja válida, o processo de autenticação deverá continuar.
 
 Caso a tag não esteja cadastrada, a entrada deverá ser recusada.
+
+---
+
+## RF02 – Cadastro da Tag
+
+O sistema deve ser capaz de cadastrar novas tags e descadastrar tags.
 
 ---
 
@@ -148,9 +146,7 @@ O sistema poderá limitar a quantidade de tentativas consecutivas de senha.
 
 ## RF15 – Tratamento de Falha no Sensor Ultrassônico
 
-O sistema deverá prever um comportamento seguro caso o sensor responsável pela detecção da passagem apresente valores inválidos ou deixe de responder.
-
-Nessa situação, a cancela **não deverá fechar automaticamente sem que haja segurança de que o veículo já passou**.
+O sistema deverá soar um alarme com o buzzer e lentamente fechar a cancela caso o sensor responsável pela detecção da passagem apresente valores inválidos ou deixe de responder.
 
 O sistema deverá sinalizar a falha e poderá exigir intervenção manual para retornar à operação normal.
 
@@ -174,7 +170,7 @@ Opcionalmente, um buzzer poderá ser utilizado para fornecer sinais sonoros dife
 
 ---
 
-## RF18 – Interface com Display
+## RF18 – Interface com Display - opcional
 
 Opcionalmente, um display LCD poderá apresentar informações ao usuário durante o processo de autenticação.
 
@@ -234,24 +230,7 @@ O código deverá possuir organização e nomenclatura que facilitem futuras alt
 
 ---
 
-## RNF06 – Registro de Eventos
-
-Eventos importantes deverão ser registrados pelo sistema para facilitar testes e diagnóstico de problemas.
-
-Entre os eventos registrados poderão estar:
-
-* acesso autorizado;
-* acesso negado;
-* entrada;
-* saída;
-* senha incorreta;
-* tag desconhecida;
-* falha de sensor;
-* horário das operações.
-
----
-
-## RNF07 – Tolerância a Falhas
+## RNF06 – Tolerância a Falhas
 
 Falhas em periféricos não deverão provocar comportamentos potencialmente perigosos.
 
@@ -269,7 +248,7 @@ Sempre que não for possível determinar com segurança o estado do sistema, dev
 | Sensor ultrassônico    | Detecção da passagem do veículo               |
 | Teclado matricial      | Digitação da senha durante o período noturno  |
 | Buzzer                 | Sinalização sonora de eventos                 |
-| Display LCD            | Exibição de mensagens ao usuário              |
+| Display LCD (opcional) | Exibição de mensagens ao usuário              |
 | Sensor de luminosidade | Identificação alternativa de dia/noite        |
 
 Os dois últimos componentes podem ser tratados como extensões do projeto caso haja tempo disponível para sua implementação.
@@ -412,23 +391,7 @@ Os dois últimos componentes podem ser tratados como extensões do projeto caso 
 
 ---
 
-# 8. Casos de Exceção Previstos
-
-| Situação                                   | Comportamento esperado                                 |
-| ------------------------------------------ | ------------------------------------------------------ |
-| Tag não cadastrada                         | Cancela permanece fechada                              |
-| Senha incorreta                            | Acesso negado                                          |
-| Veículo tenta entrar duas vezes            | Nova entrada recusada                                  |
-| Veículo tenta sair sem registro de entrada | Saída recusada ou sinalizada                           |
-| RFID apresenta falha                       | Cancela permanece fechada                              |
-| Sensor ultrassônico apresenta falha        | Fechamento automático é interrompido                   |
-| Veículo permanece sob a cancela            | Cancela permanece aberta                               |
-| Falha na obtenção do horário               | Utilizar sensor de luminosidade ou configuração segura |
-| Reinicialização inesperada                 | Sistema inicia com a cancela em estado seguro          |
-
----
-
-# 9. Escopo Inicial
+# 8. Escopo Inicial
 
 Para a primeira versão funcional do projeto, serão considerados componentes essenciais:
 
@@ -441,18 +404,8 @@ Para a primeira versão funcional do projeto, serão considerados componentes es
 7. controle dos veículos presentes no estacionamento;
 8. tratamento dos principais casos de falha.
 
-Como funcionalidades adicionais, poderão ser implementados:
 
-* LCD;
-* buzzer;
-* sensor de luminosidade;
-* histórico completo de acessos;
-* interface Web para consulta dos veículos presentes;
-* painel de administração para cadastro de tags.
-
----
-
-# 10. Objetivo da Primeira Etapa
+# 9. Objetivo da Primeira Etapa
 
 Nesta etapa inicial, o projeto deverá estabelecer claramente o comportamento esperado do sistema e sua arquitetura antes da integração completa dos componentes.
 
