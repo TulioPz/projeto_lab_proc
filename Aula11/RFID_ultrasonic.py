@@ -6,10 +6,16 @@ from RPLCD.i2c import CharLCD
 
 
 ENDERECO_LCD = 0x27
+
 SERVO_PIN = 18
+TRIGGER_PIN = 14
+ECHO_PIN = 15
 
 ANGULO_FECHADO = 0
 ANGULO_ABERTO = 90
+
+DISTANCIA_SEGURA = 20.0
+INTERVALO_LEITURA = 0.3
 
 USUARIOS = {
     "584739201845": "Tulio",
@@ -20,11 +26,15 @@ USUARIOS = {
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
+
 GPIO.setup(SERVO_PIN, GPIO.OUT)
+GPIO.setup(TRIGGER_PIN, GPIO.OUT)
+GPIO.setup(ECHO_PIN, GPIO.IN)
+
+GPIO.output(TRIGGER_PIN, GPIO.LOW)
 
 servo = GPIO.PWM(SERVO_PIN, 50)
 servo.start(0)
-
 
 lcd = CharLCD(
     i2c_expander="PCF8574",
@@ -67,6 +77,7 @@ def mover_servo_lentamente(angulo_inicial, angulo_final, atraso=0.04):
 
 def abrir_cancela():
     mostrar_mensagem("Abrindo", "cancela...")
+
     mover_servo_lentamente(
         ANGULO_FECHADO,
         ANGULO_ABERTO,
@@ -76,6 +87,7 @@ def abrir_cancela():
 
 def fechar_cancela():
     mostrar_mensagem("Fechando", "cancela...")
+
     mover_servo_lentamente(
         ANGULO_ABERTO,
         ANGULO_FECHADO,
@@ -83,12 +95,82 @@ def fechar_cancela():
     )
 
 
+def medir_distancia():
+    GPIO.output(TRIGGER_PIN, GPIO.LOW)
+    time.sleep(0.0002)
+
+    GPIO.output(TRIGGER_PIN, GPIO.HIGH)
+    time.sleep(0.00001)
+    GPIO.output(TRIGGER_PIN, GPIO.LOW)
+
+    inicio_timeout = time.time()
+
+    while GPIO.input(ECHO_PIN) == GPIO.LOW:
+        if time.time() - inicio_timeout > 0.03:
+            return None
+
+    inicio_pulso = time.time()
+    inicio_timeout = time.time()
+
+    while GPIO.input(ECHO_PIN) == GPIO.HIGH:
+        if time.time() - inicio_timeout > 0.03:
+            return None
+
+    fim_pulso = time.time()
+
+    duracao = fim_pulso - inicio_pulso
+    distancia = (duracao * 34300) / 2
+
+    return distancia
+
+
+def aguardar_area_livre():
+    mostrar_mensagem(
+        "Aguardando",
+        "veiculo passar"
+    )
+
+    leituras_livres = 0
+
+    while leituras_livres < 3:
+        distancia = medir_distancia()
+
+        if distancia is None:
+            mostrar_mensagem(
+                "Erro no sensor",
+                "Cancela aberta"
+            )
+
+            print("Falha ao medir a distância.")
+            leituras_livres = 0
+
+        else:
+            print(f"Distancia: {distancia:.1f} cm")
+
+            if distancia >= DISTANCIA_SEGURA:
+                leituras_livres += 1
+            else:
+                leituras_livres = 0
+
+                mostrar_mensagem(
+                    "Veiculo",
+                    "detectado"
+                )
+
+        time.sleep(INTERVALO_LEITURA)
+
+
 try:
     definir_angulo(ANGULO_FECHADO)
     servo.ChangeDutyCycle(0)
 
+    time.sleep(1)
+
     while True:
-        mostrar_mensagem("Aproxime a tag", "")
+        mostrar_mensagem(
+            "Aproxime a tag",
+            ""
+        )
 
         id_tag, texto = leitor.read()
         id_tag = str(id_tag)
@@ -110,10 +192,13 @@ try:
             abrir_cancela()
 
             mostrar_mensagem(
-                "Cancela aberta"
+                "Cancela aberta",
+                "Pode entrar"
             )
 
-            time.sleep(5)
+            time.sleep(1)
+
+            aguardar_area_livre()
 
             fechar_cancela()
 
