@@ -12,9 +12,8 @@ ANGULO_FECHADO = 0
 ANGULO_ABERTO = 90
 
 USUARIOS = {
-    "584739201845": "Tulio",
-    "927461830572": "Joao",
-    "347829105638": "Maria"
+    "665465521850": "Tulio",
+    "729854772989": "Daniel"
 }
 
 
@@ -110,7 +109,8 @@ try:
             abrir_cancela()
 
             mostrar_mensagem(
-                "Cancela aberta"
+                "Cancela aberta",
+                "Pode entrar"
             )
 
             time.sleep(5)

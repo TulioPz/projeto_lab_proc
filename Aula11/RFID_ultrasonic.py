@@ -18,8 +18,8 @@ DISTANCIA_SEGURA = 20.0
 INTERVALO_LEITURA = 0.3
 
 USUARIOS = {
-    "584739201845": "Tulio",
-    "927461830572": "Joao",
+    "729854772989": "Tulio",
+    "665465521850": "PSPSPS",
     "347829105638": "Maria"
 }
 
@@ -81,7 +81,7 @@ def abrir_cancela():
     mover_servo_lentamente(
         ANGULO_FECHADO,
         ANGULO_ABERTO,
-        atraso=0.04
+        atraso=0.02
     )
 
 
