@@ -36,7 +36,11 @@ HORA_FIM_SEM_SENHA = 20
 TENTATIVAS_MAXIMAS = 3
 TEMPO_LIMITE_SENHA = 30
 
-ARQUIVO_PONTOS = Path(__file__).resolve().parent / "pontos.txt"
+
+PASTA_PROGRAMA = Path(__file__).resolve().parent
+
+ARQUIVO_PONTOS = PASTA_PROGRAMA / "pontos.txt"
+ARQUIVO_HISTORICO = PASTA_PROGRAMA / "historico.txt"
 
 
 USUARIOS = {
@@ -55,9 +59,9 @@ USUARIOS = {
 }
 
 
-# =========================
-# CONTROLE DO PONTOS.TXT
-# =========================
+# =========================================================
+# ARQUIVO PONTOS.TXT
+# =========================================================
 
 def garantir_arquivo_pontos():
     ARQUIVO_PONTOS.touch(exist_ok=True)
@@ -125,27 +129,90 @@ def registrar_saida(id_tag):
 
     salvar_carros_dentro(carros_dentro)
 
-    print(f"{nome} removido do estacionamento.")
+    print(
+        f"{nome} removido da lista de veiculos dentro."
+    )
 
     return True
 
 
-# =========================
+# =========================================================
+# HISTORICO.TXT
+# =========================================================
+
+def garantir_arquivo_historico():
+    ARQUIVO_HISTORICO.touch(exist_ok=True)
+
+
+def registrar_historico(id_tag, usuario, tipo):
+    garantir_arquivo_historico()
+
+    agora = datetime.now()
+
+    data_hora = agora.strftime(
+        "%d/%m/%Y %H:%M:%S"
+    )
+
+    with open(
+        ARQUIVO_HISTORICO,
+        "a",
+        encoding="utf-8"
+    ) as arquivo:
+
+        arquivo.write(
+            f"{data_hora};"
+            f"{tipo};"
+            f"{id_tag};"
+            f"{usuario['nome']}\n"
+        )
+
+    print(
+        f"Historico: "
+        f"{tipo} - "
+        f"{usuario['nome']} - "
+        f"{data_hora}"
+    )
+
+
+# =========================================================
 # CONFIGURACAO GPIO
-# =========================
+# =========================================================
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(SERVO_PIN, GPIO.OUT)
-GPIO.setup(TRIGGER_PIN, GPIO.OUT)
-GPIO.setup(ECHO_PIN, GPIO.IN)
+GPIO.setup(
+    SERVO_PIN,
+    GPIO.OUT
+)
 
-GPIO.output(TRIGGER_PIN, GPIO.LOW)
+GPIO.setup(
+    TRIGGER_PIN,
+    GPIO.OUT
+)
+
+GPIO.setup(
+    ECHO_PIN,
+    GPIO.IN
+)
+
+GPIO.output(
+    TRIGGER_PIN,
+    GPIO.LOW
+)
+
 
 for linha in LINHAS:
-    GPIO.setup(linha, GPIO.OUT)
-    GPIO.output(linha, GPIO.HIGH)
+    GPIO.setup(
+        linha,
+        GPIO.OUT
+    )
+
+    GPIO.output(
+        linha,
+        GPIO.HIGH
+    )
+
 
 for coluna in COLUNAS:
     GPIO.setup(
@@ -155,7 +222,11 @@ for coluna in COLUNAS:
     )
 
 
-servo = GPIO.PWM(SERVO_PIN, 50)
+servo = GPIO.PWM(
+    SERVO_PIN,
+    50
+)
+
 servo.start(0)
 
 
@@ -173,32 +244,41 @@ lcd = CharLCD(
 leitor = SimpleMFRC522()
 
 
-# =========================
+# =========================================================
 # LCD
-# =========================
+# =========================================================
 
-def mostrar_mensagem(linha1="", linha2=""):
+def mostrar_mensagem(
+    linha1="",
+    linha2=""
+):
     lcd.clear()
 
     lcd.cursor_pos = (0, 0)
+
     lcd.write_string(
         linha1[:16].ljust(16)
     )
 
     lcd.cursor_pos = (1, 0)
+
     lcd.write_string(
         linha2[:16].ljust(16)
     )
 
 
-# =========================
+# =========================================================
 # SERVO
-# =========================
+# =========================================================
 
 def definir_angulo(angulo):
-    duty_cycle = 2.5 + (angulo / 18.0)
+    duty_cycle = 2.5 + (
+        angulo / 18.0
+    )
 
-    servo.ChangeDutyCycle(duty_cycle)
+    servo.ChangeDutyCycle(
+        duty_cycle
+    )
 
     time.sleep(0.03)
 
@@ -219,9 +299,13 @@ def mover_servo_lentamente(
         angulo_final + passo,
         passo
     ):
-        definir_angulo(angulo)
+        definir_angulo(
+            angulo
+        )
 
-        time.sleep(atraso)
+        time.sleep(
+            atraso
+        )
 
     servo.ChangeDutyCycle(0)
 
@@ -252,9 +336,9 @@ def fechar_cancela():
     )
 
 
-# =========================
+# =========================================================
 # SENSOR ULTRASSONICO
-# =========================
+# =========================================================
 
 def medir_distancia():
     GPIO.output(
@@ -262,14 +346,18 @@ def medir_distancia():
         GPIO.LOW
     )
 
-    time.sleep(0.0002)
+    time.sleep(
+        0.0002
+    )
 
     GPIO.output(
         TRIGGER_PIN,
         GPIO.HIGH
     )
 
-    time.sleep(0.00001)
+    time.sleep(
+        0.00001
+    )
 
     GPIO.output(
         TRIGGER_PIN,
@@ -279,7 +367,11 @@ def medir_distancia():
     inicio_timeout = time.time()
 
     while GPIO.input(ECHO_PIN) == GPIO.LOW:
-        if time.time() - inicio_timeout > 0.03:
+        if (
+            time.time()
+            - inicio_timeout
+            > 0.03
+        ):
             return None
 
     inicio_pulso = time.time()
@@ -287,7 +379,11 @@ def medir_distancia():
     inicio_timeout = time.time()
 
     while GPIO.input(ECHO_PIN) == GPIO.HIGH:
-        if time.time() - inicio_timeout > 0.03:
+        if (
+            time.time()
+            - inicio_timeout
+            > 0.03
+        ):
             return None
 
     fim_pulso = time.time()
@@ -336,14 +432,16 @@ def aguardar_area_livre():
                 f"{distancia:.1f} cm"
             )
 
-            if distancia >= DISTANCIA_SEGURA:
+            if (
+                distancia
+                >= DISTANCIA_SEGURA
+            ):
 
                 leituras_livres += 1
 
                 mostrar_mensagem(
                     "Area livre",
-                    f"Confirmando "
-                    f"{leituras_livres}/3"
+                    f"Confirmando {leituras_livres}/3"
                 )
 
             else:
@@ -360,15 +458,12 @@ def aguardar_area_livre():
         )
 
 
-# =========================
+# =========================================================
 # HORARIO
-# =========================
+# =========================================================
 
 def horario_exige_senha():
-
-    hora_atual = (
-        datetime.now().hour
-    )
+    hora_atual = datetime.now().hour
 
     return not (
         HORA_INICIO_SEM_SENHA
@@ -377,9 +472,9 @@ def horario_exige_senha():
     )
 
 
-# =========================
+# =========================================================
 # TECLADO
-# =========================
+# =========================================================
 
 def esperar_soltar_tecla(
     linha,
@@ -391,7 +486,9 @@ def esperar_soltar_tecla(
         )
         == GPIO.LOW
     ):
-        time.sleep(0.02)
+        time.sleep(
+            0.02
+        )
 
     GPIO.output(
         LINHAS[linha],
@@ -426,7 +523,9 @@ def ler_tecla():
                         indice_coluna
                     ]
 
-                    time.sleep(0.05)
+                    time.sleep(
+                        0.05
+                    )
 
                     esperar_soltar_tecla(
                         indice_linha,
@@ -440,7 +539,9 @@ def ler_tecla():
                 GPIO.HIGH
             )
 
-        time.sleep(0.01)
+        time.sleep(
+            0.01
+        )
 
 
 def ler_senha_teclado():
@@ -466,7 +567,9 @@ def ler_senha_teclado():
                 "Acesso negado"
             )
 
-            time.sleep(2)
+            time.sleep(
+                2
+            )
 
             return None
 
@@ -494,6 +597,10 @@ def ler_senha_teclado():
         )
 
 
+# =========================================================
+# AUTENTICACAO
+# =========================================================
+
 def autenticar_com_senha(usuario):
 
     for tentativa in range(
@@ -506,7 +613,9 @@ def autenticar_com_senha(usuario):
             "Senha obrigatoria"
         )
 
-        time.sleep(2)
+        time.sleep(
+            2
+        )
 
         senha_digitada = (
             ler_senha_teclado()
@@ -528,8 +637,7 @@ def autenticar_com_senha(usuario):
 
         mostrar_mensagem(
             "Senha incorreta",
-            f"Restam: "
-            f"{tentativas_restantes}"
+            f"Restam: {tentativas_restantes}"
         )
 
         print(
@@ -538,21 +646,25 @@ def autenticar_com_senha(usuario):
             f"{tentativas_restantes}"
         )
 
-        time.sleep(2)
+        time.sleep(
+            2
+        )
 
     mostrar_mensagem(
         "Acesso bloqueado",
         "Muitas tentativas"
     )
 
-    time.sleep(3)
+    time.sleep(
+        3
+    )
 
     return False
 
 
-# =========================
-# PROCESSAMENTO DA ENTRADA
-# =========================
+# =========================================================
+# ENTRADA
+# =========================================================
 
 def processar_entrada(
     id_tag,
@@ -566,11 +678,13 @@ def processar_entrada(
     )
 
     print(
-        f"Acesso autorizado "
+        f"Entrada autorizada "
         f"para {nome}"
     )
 
-    time.sleep(2)
+    time.sleep(
+        2
+    )
 
     abrir_cancela()
 
@@ -579,61 +693,149 @@ def processar_entrada(
         "Pode entrar"
     )
 
-    time.sleep(1)
+    time.sleep(
+        1
+    )
 
     aguardar_area_livre()
 
     fechar_cancela()
 
-    # O carro somente e registrado
-    # depois de completar a entrada
     registrar_entrada(
         id_tag,
         usuario
     )
 
-    mostrar_mensagem(
-        "Cancela fechada",
-        ""
+    registrar_historico(
+        id_tag,
+        usuario,
+        "ENTRADA"
     )
 
-    time.sleep(2)
+    print(
+        f"{nome} entrou "
+        "no estacionamento."
+    )
+
+    mostrar_mensagem(
+        "Entrada",
+        "registrada"
+    )
+
+    time.sleep(
+        2
+    )
 
 
-# =========================
+# =========================================================
+# SAIDA
+# =========================================================
+
+def processar_saida(
+    id_tag,
+    usuario
+):
+    nome = usuario["nome"]
+
+    mostrar_mensagem(
+        "Ate logo,",
+        nome
+    )
+
+    print(
+        f"Saida autorizada "
+        f"para {nome}"
+    )
+
+    time.sleep(
+        2
+    )
+
+    abrir_cancela()
+
+    mostrar_mensagem(
+        "Cancela aberta",
+        "Pode sair"
+    )
+
+    time.sleep(
+        1
+    )
+
+    aguardar_area_livre()
+
+    fechar_cancela()
+
+    registrar_saida(
+        id_tag
+    )
+
+    registrar_historico(
+        id_tag,
+        usuario,
+        "SAIDA"
+    )
+
+    print(
+        f"{nome} saiu "
+        "do estacionamento."
+    )
+
+    mostrar_mensagem(
+        "Ate logo!",
+        nome
+    )
+
+    time.sleep(
+        2
+    )
+
+
+# =========================================================
 # PROGRAMA PRINCIPAL
-# =========================
+# =========================================================
 
 try:
 
     garantir_arquivo_pontos()
+    garantir_arquivo_historico()
 
     definir_angulo(
         ANGULO_FECHADO
     )
 
-    servo.ChangeDutyCycle(0)
+    servo.ChangeDutyCycle(
+        0
+    )
 
-    time.sleep(1)
+    time.sleep(
+        1
+    )
 
     print(
         "Sistema iniciado."
     )
 
     print(
-        f"Arquivo de controle: "
+        f"Arquivo de estado: "
         f"{ARQUIVO_PONTOS}"
     )
+
+    print(
+        f"Arquivo de historico: "
+        f"{ARQUIVO_HISTORICO}"
+    )
+
 
     carros_iniciais = (
         carregar_carros_dentro()
     )
 
+
     if carros_iniciais:
 
         print(
-            "Veiculos atualmente "
-            "dentro:"
+            "\nVeiculos atualmente dentro:"
         )
 
         for (
@@ -649,9 +851,10 @@ try:
     else:
 
         print(
-            "Nenhum veiculo "
+            "\nNenhum veiculo "
             "registrado dentro."
         )
+
 
     while True:
 
@@ -664,7 +867,9 @@ try:
             leitor.read()
         )
 
-        id_tag = str(id_tag)
+        id_tag = str(
+            id_tag
+        )
 
         hora_atual = (
             datetime.now()
@@ -678,15 +883,19 @@ try:
         print(
             "Horario atual:",
             hora_atual.strftime(
-                "%H:%M:%S"
+                "%d/%m/%Y %H:%M:%S"
             )
         )
 
-        # ---------------------
-        # TAG DESCONHECIDA
-        # ---------------------
 
-        if id_tag not in USUARIOS:
+        # =================================================
+        # VERIFICA SE A TAG ESTA CADASTRADA
+        # =================================================
+
+        if (
+            id_tag
+            not in USUARIOS
+        ):
 
             print(
                 "Tag nao cadastrada."
@@ -697,9 +906,12 @@ try:
                 "Tag desconhecida"
             )
 
-            time.sleep(3)
+            time.sleep(
+                3
+            )
 
             continue
+
 
         usuario = USUARIOS[
             id_tag
@@ -709,32 +921,42 @@ try:
             "nome"
         ]
 
-        # ---------------------
-        # VERIFICA SE JA ENTROU
-        # ---------------------
 
-        if carro_esta_dentro(
-            id_tag
-        ):
+        # =================================================
+        # DESCOBRE SE E ENTRADA OU SAIDA
+        # =================================================
+
+        esta_dentro = (
+            carro_esta_dentro(
+                id_tag
+            )
+        )
+
+
+        if esta_dentro:
 
             print(
-                f"{nome} ja esta "
-                "dentro do "
-                "estacionamento."
+                f"{nome} esta dentro."
             )
 
-            mostrar_mensagem(
-                "Acesso negado",
-                "Ja esta dentro"
+            print(
+                "Operacao identificada: SAIDA"
             )
 
-            time.sleep(3)
+        else:
 
-            continue
+            print(
+                f"{nome} esta fora."
+            )
 
-        # ---------------------
-        # VERIFICACAO DE SENHA
-        # ---------------------
+            print(
+                "Operacao identificada: ENTRADA"
+            )
+
+
+        # =================================================
+        # SENHA DURANTE O HORARIO NOTURNO
+        # =================================================
 
         if horario_exige_senha():
 
@@ -752,8 +974,7 @@ try:
             if not senha_correta:
 
                 print(
-                    "Autenticacao "
-                    "cancelada."
+                    "Acesso negado."
                 )
 
                 continue
@@ -766,18 +987,27 @@ try:
 
             print(
                 "Horario permitido: "
-                "acesso somente "
-                "com RFID."
+                "acesso somente com RFID."
             )
 
-        # ---------------------
-        # ENTRADA
-        # ---------------------
 
-        processar_entrada(
-            id_tag,
-            usuario
-        )
+        # =================================================
+        # EXECUTA ENTRADA OU SAIDA
+        # =================================================
+
+        if esta_dentro:
+
+            processar_saida(
+                id_tag,
+                usuario
+            )
+
+        else:
+
+            processar_entrada(
+                id_tag,
+                usuario
+            )
 
 
 except KeyboardInterrupt:
@@ -789,7 +1019,9 @@ except KeyboardInterrupt:
 
 finally:
 
-    servo.ChangeDutyCycle(0)
+    servo.ChangeDutyCycle(
+        0
+    )
 
     servo.stop()
 
