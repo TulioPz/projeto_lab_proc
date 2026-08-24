@@ -410,3 +410,14 @@ Para a primeira versão funcional do projeto, serão considerados componentes es
 Nesta etapa inicial, o projeto deverá estabelecer claramente o comportamento esperado do sistema e sua arquitetura antes da integração completa dos componentes.
 
 A implementação deverá ser realizada de forma incremental, inicialmente testando individualmente RFID, teclado, servomotor e sensor ultrassônico e, posteriormente, realizando a integração dos módulos no sistema completo de controle de acesso.
+
+
+# 10. Licença
+
+Copyright (C) 2026 caioma
+
+Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da GNU General Public License, versão 3, conforme publicada pela Free Software Foundation.
+
+Este programa é distribuído na expectativa de que seja útil, mas SEM NENHUMA GARANTIA; sem mesmo a garantia implícita de COMERCIALIZAÇÃO ou ADEQUAÇÃO A UM DETERMINADO FIM. Consulte a GNU General Public License para mais detalhes.
+
+O texto completo da licença está disponível no arquivo [LICENSE](LICENSE).
